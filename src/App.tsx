@@ -21,19 +21,21 @@ function App() {
   ]);
 
   function dragStartHandler(e: React.MouseEvent, card: any){
-    console.log(card)
+    console.log('drag',card)
   }
   function dragLeaveHandler(e: React.MouseEvent){
 
   }
   function dragOverHandler(e: React.MouseEvent){
+    e.preventDefault()
 
   }
   function dragEndHandler(e: React.MouseEvent){
-
+    
   }
-  function dragDropHandler(e: React.MouseEvent, card: any){
-
+  function dropHandler(e: React.MouseEvent, card: any){
+    e.preventDefault()
+    console.log('drop', card)
   }
 
   return (
@@ -44,7 +46,7 @@ function App() {
           onDragLeave={(e) => dragLeaveHandler(e)}
           onDragOver={(e) => dragOverHandler(e)}
           onDragEnd={(e) => dragEndHandler(e)}
-          onDrop={(e) => dragDropHandler(e, card)}
+          onDrop={(e) => dropHandler(e, card)}
 
           className={'card'} 
           draggable={true}>
