@@ -1,18 +1,15 @@
-import React, {ReactFragment as RF} from 'react';
-import { useState } from 'react';
-import styled from 'styled-components'
+import React from 'react'
+import { useState } from 'react'
+import CardWord from './components/CardWord'
 
-const CardStyle = styled.div`
-  background: transparent;
-  border-radius: 3px;
-  border: 2px solid palevioletred;
-  color: palevioletred;
-  margin: 0 1em;
-  padding: 0.25em 1em;
-  cursor:grab;
-`
+interface ICard{
+  id?: number;
+  order?:number;
+  text?: string;
+}
 
 function App() {
+
   const [cardList, setCardList] = useState([
     {id: 1, order: 3, text: 'Card 1'},
     {id: 2, order: 1, text: 'Card 2'},
@@ -20,38 +17,56 @@ function App() {
     {id: 4, order: 2, text: 'Card 4'},
   ]);
 
+  const [currentCard, setCurrentCard] = useState<ICard>({})
+
   function dragStartHandler(e: React.MouseEvent, card: any){
     console.log('drag',card)
+    setCurrentCard(card)
   }
-  function dragLeaveHandler(e: React.MouseEvent){
+  function dragLeaveHandler(e: any){
+    console.log('drag leave')
+    e.target.style.background = 'white'
 
   }
-  function dragOverHandler(e: React.MouseEvent){
-    e.preventDefault()
-
+  function dragEndHandler(e: any){
+    console.log('drag end')
+    //e.target.style.background = 'white'
   }
-  function dragEndHandler(e: React.MouseEvent){
-    
-  }
-  function dropHandler(e: React.MouseEvent, card: any){
+  function dragOverHandler(e: any){
     e.preventDefault()
+    e.target.style.background = 'lightgray'
+  }
+  function dropHandler(e: any, card: any){
+    e.preventDefault()
+    e.target.style.background = 'white'
     console.log('drop', card)
+    setCardList(cardList.map((c: any) => {
+      if(c.id === card.id){
+        return { ...c, order: currentCard.order }
+      }
+      if(c.id === currentCard.id){
+        return { ...c, order: card.order }
+      }
+      return c
+    }))
+  }
+
+  const sortCards = (a: any, b: any) => {
+    return a.order > b.order ? 1 : -1
   }
 
   return (
     <div className="App">
-      {cardList.map((card,i) => 
-        <div key={i}
-          onDragStart={(e) => dragStartHandler(e, card)}  
-          onDragLeave={(e) => dragLeaveHandler(e)}
-          onDragOver={(e) => dragOverHandler(e)}
-          onDragEnd={(e) => dragEndHandler(e)}
-          onDrop={(e) => dropHandler(e, card)}
-
-          className={'card'} 
-          draggable={true}>
+      {cardList.sort(sortCards).map((card,i) => 
+        <CardWord key={i}
+          onDragStart={(e: any) => dragStartHandler(e, card)}  
+          onDragLeave={(e: any) => dragLeaveHandler(e)}
+          onDragEnd={(e: any) => dragEndHandler(e)}
+          onDragOver={(e: any) => dragOverHandler(e)}
+          onDrop={(e: any) => dropHandler(e, card)}
+          >
           {card.text}
-        </div>
+        </CardWord>
       )}
     </div>
   );
