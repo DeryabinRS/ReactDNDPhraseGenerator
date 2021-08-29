@@ -1,75 +1,71 @@
-import React from 'react'
-import { useState } from 'react'
-import CardWord from './components/CardWord'
+import React, { useState } from "react"
+import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd"
+import "./App.css"
 
-interface ICard{
-  id?: number;
-  order?:number;
-  text?: string;
-}
+
+const listItems = [
+	{id: "1",name: "Study Spanish"},
+	{id: "2",name: "Workout"},
+	{id: "3",name: "Film Youtube"},
+	{id: "4",name: "Grocery Shop"}
+]
+
+
+const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
+	padding: 10,
+	display: `inline-block`,
+	margin: `0 50px 15px 50px`,
+	background: isDragging ? "#4a2975" : "white",
+	color: isDragging ? "white" : "black",
+	border: `1px solid black`,
+	fontSize: `20px`,
+	borderRadius: `5px`,
+	
+	...draggableStyle
+})
 
 function App() {
+	const [ todo, setTodo ] = useState(listItems)
 
-  const [cardList, setCardList] = useState([
-    {id: 1, order: 3, text: 'Card 1'},
-    {id: 2, order: 1, text: 'Card 2'},
-    {id: 3, order: 4, text: 'Card 3'},
-    {id: 4, order: 2, text: 'Card 4'},
-  ]);
+	const onDragEnd = (result: DropResult) => {
+		const { source, destination } = result
+		if (!destination) return
 
-  const [currentCard, setCurrentCard] = useState<ICard>({})
+		const items = Array.from(todo)
+		const [ newOrder ] = items.splice(source.index, 1)
+		items.splice(destination.index, 0, newOrder)
 
-  function dragStartHandler(e: React.MouseEvent, card: any){
-    console.log('drag',card)
-    setCurrentCard(card)
-  }
-  function dragLeaveHandler(e: any){
-    console.log('drag leave')
-    e.target.style.background = 'white'
-
-  }
-  function dragEndHandler(e: any){
-    console.log('drag end')
-    //e.target.style.background = 'white'
-  }
-  function dragOverHandler(e: any){
-    e.preventDefault()
-    e.target.style.background = 'lightgray'
-  }
-  function dropHandler(e: any, card: any){
-    e.preventDefault()
-    e.target.style.background = 'white'
-    console.log('drop', card)
-    setCardList(cardList.map((c: any) => {
-      if(c.id === card.id){
-        return { ...c, order: currentCard.order }
-      }
-      if(c.id === currentCard.id){
-        return { ...c, order: card.order }
-      }
-      return c
-    }))
-  }
-
-  const sortCards = (a: any, b: any) => {
-    return a.order > b.order ? 1 : -1
-  }
-
-  return (
-    <div className="App">
-      {cardList.sort(sortCards).map((card,i) => 
-        <CardWord key={i}
-          onDragStart={(e: any) => dragStartHandler(e, card)}  
-          onDragLeave={(e: any) => dragLeaveHandler(e)}
-          onDragEnd={(e: any) => dragEndHandler(e)}
-          onDragOver={(e: any) => dragOverHandler(e)}
-          onDrop={(e: any) => dropHandler(e, card)}
-          >
-          {card.text}
-        </CardWord>
-      )}
-    </div>
-  );
+		setTodo(items)
+	}
+	return (
+		<div className="App">
+			<h1>Drag and Drop</h1>
+			<DragDropContext onDragEnd={onDragEnd}>
+				<Droppable droppableId="todo" direction="horizontal">
+					{(provided) => (
+						<div className="todo" {...provided.droppableProps} ref={provided.innerRef}>
+							{todo.map(({ id, name }, index) => {
+								return (
+									<Draggable key={id} draggableId={id} index={index}>
+										{(provided, snapshot) => (
+											<div
+												ref={provided.innerRef}
+												{...provided.draggableProps}
+												{...provided.dragHandleProps}
+												style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+											>
+												{name}
+											</div>
+										)}
+									</Draggable>
+								)
+							})}
+						</div>
+					)}
+				</Droppable>
+			</DragDropContext>
+		</div>
+	)
 }
 
-export default App;
+export default App
