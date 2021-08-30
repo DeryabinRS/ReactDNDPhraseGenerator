@@ -19,12 +19,12 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   ...draggableStyle,
 });
 
-const getItemCard = styled.div<{isDragging: boolean}>`
-	padding: ${grid} * 2;
-	margin: 0 ${grid}px 0 0;
-	trnsition: .3s;
-	background: ${props => (props.isDragging ? 'lightgreen' : 'lightgrey')};
-`;
+// const getItemCard = styled.div<{isDragging: boolean}>`
+// 	padding: ${grid} * 2;
+// 	margin: 0 ${grid}px 0 0;
+// 	trnsition: .3s;
+// 	background: ${props => (props.isDragging ? 'lightgreen' : 'lightgrey')};
+// `;
 
 const WordList = styled.div`
 	display: flex;
@@ -54,6 +54,7 @@ function App() {
 	//const [initialData, setInitialData] = useState(listItems(currentString))
 
 	const [ cards, setCards ] = useState<ICard[]>(listItems(currentString))
+	const [isVictory, setVictory] = useState(false)
 
 	const onDragEnd = (result: DropResult) => {
 		const { source, destination, draggableId } = result
@@ -78,8 +79,20 @@ function App() {
 			const newCol = +finish.slice(-1);
 			newOrder.col = newCol
 			items.splice(destination.index, 0, newOrder)
-			console.log(newOrder, newCol)
 		}
+
+		getResult();
+	}
+
+	function getResult(){
+		console.log(cards)
+		for(let i = 0; i < cards.length; i++){
+			let cId = +cards[i].id;
+			if(i + 1 !== cId){
+				setVictory(true)
+			}
+		}
+		console.log(isVictory)
 	}
 
 	return (
