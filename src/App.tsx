@@ -1,49 +1,47 @@
 import React, { useState } from "react"
+import { useEffect } from "react"
 import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd"
 import styled from 'styled-components'
 import "./App.css"
 
 const currentString = "I don't know what the facking GraphQL"
-
-const listItems = (str:string) => str.split(' ').map((item, index) => {
-  return {id: String(index + 1), name: item, col: 1}
-}).sort(() => Math.random() - 0.5)
+const listItems = currentString.split(' ').map((item, index) => {
+	return {id: String(index), name: item, col: 1}
+  }).sort(() => Math.random() - 0.5)
 
 const grid = 8;
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   padding: grid * 2,
-  margin: `0 ${grid}px 0 0`,
+  margin: `10px ${grid}px 10px 0`,
   trnsition: '.3s',
+  boxShadow: '0 0 3px',
   background: isDragging ? 'lightgreen' : 'lightgrey',
   ...draggableStyle,
 });
-
-// const getItemCard = styled.div<{isDragging: boolean}>`
-// 	padding: ${grid} * 2;
-// 	margin: 0 ${grid}px 0 0;
-// 	trnsition: .3s;
-// 	background: ${props => (props.isDragging ? 'lightgreen' : 'lightgrey')};
-// `;
 
 const WordList = styled.div`
 	display: flex;
 	justify-content: center;
 	padding: grid;
 	overflow: auto;
-	height:50px;
-	background: lightblue;
+	height:70px;
+	background: #eee;
 `;
-
 const PhraseBox = styled.div`
 	display: flex;
 	justify-content: center;
 	padding: grid;
 	overflow: auto;
-	background: lightgray;
-	height:50px;
+	background: #ccc;
+	height:70px;
 	margin-top:50px;
 `;
+const Victory = styled.b`
+	color:red;
+	font-size:25px;
+`
+
 interface ICard {
 	id: string;
 	name:string;
@@ -51,10 +49,12 @@ interface ICard {
 }
 function App() {
 
-	//const [initialData, setInitialData] = useState(listItems(currentString))
-
-	const [ cards, setCards ] = useState<ICard[]>(listItems(currentString))
+	const [ cards, setCards ] = useState<ICard[]>(listItems)
 	const [isVictory, setVictory] = useState(false)
+
+	useEffect(()=> {
+		setVictory(getResult());
+	},[cards])
 
 	const onDragEnd = (result: DropResult) => {
 		const { source, destination, draggableId } = result
@@ -79,20 +79,18 @@ function App() {
 			const newCol = +finish.slice(-1);
 			newOrder.col = newCol
 			items.splice(destination.index, 0, newOrder)
+			setCards(items)
 		}
-
-		getResult();
 	}
 
 	function getResult(){
-		console.log(cards)
 		for(let i = 0; i < cards.length; i++){
 			let cId = +cards[i].id;
-			if(i + 1 !== cId){
-				setVictory(true)
+			if(i !== cId || cards[i].col === 1){
+				return false
 			}
 		}
-		console.log(isVictory)
+		return true;
 	}
 
 	return (
@@ -152,7 +150,11 @@ function App() {
 				</Droppable>
 
 			</DragDropContext>
-			<b>Drag a word to this field</b>
+			{isVictory ?
+				<Victory>Hell Yeah!!!</Victory> 
+				:
+				<b>Drag a word to this field</b>
+			}
 		</div>
 	)
 }
